@@ -20,7 +20,7 @@ public interface Action<
     T, TS extends BaseStream<T, TS>, 
     R, RS extends BaseStream<R, RS>
 > extends HasPrevious<T, TS>, HasNext<R, RS> {
- 
+
     @SuppressWarnings("unchecked")
     default Optional<FilterAction<T>> ifFilter() {
         return CastUtil.castIf(this, FilterAction.class)

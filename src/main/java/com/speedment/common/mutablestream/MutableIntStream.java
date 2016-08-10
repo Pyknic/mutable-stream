@@ -9,6 +9,10 @@ import com.speedment.common.mutablestream.action.MapIntToIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
 import com.speedment.common.mutablestream.terminate.CountTerminator;
+import com.speedment.common.mutablestream.terminate.ForEachIntOrderedTerminator;
+import com.speedment.common.mutablestream.terminate.ForEachIntTerminator;
+import com.speedment.common.mutablestream.terminate.ReduceIntTerminator;
+import com.speedment.common.mutablestream.terminate.ToIntArrayTerminator;
 import java.util.IntSummaryStatistics;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -149,16 +153,16 @@ public final class MutableIntStream implements IntStream {
      * {@inheritDoc}
      */
     @Override
-    public void forEach(IntConsumer ic) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void forEach(IntConsumer action) {
+        pipeline.execute(ForEachIntTerminator.create(pipeline, parallel, action));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void forEachOrdered(IntConsumer ic) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void forEachOrdered(IntConsumer action) {
+        pipeline.execute(ForEachIntOrderedTerminator.create(pipeline, parallel, action));
     }
 
     /**
@@ -166,23 +170,23 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public int[] toArray() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(ToIntArrayTerminator.create(pipeline, parallel));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int reduce(int i, IntBinaryOperator ibo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int reduce(int initialValue, IntBinaryOperator combiner) {
+        return pipeline.execute(ReduceIntTerminator.create(pipeline, parallel, initialValue, combiner)).getAsInt();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public OptionalInt reduce(IntBinaryOperator ibo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public OptionalInt reduce(IntBinaryOperator combiner) {
+        return pipeline.execute(ReduceIntTerminator.create(pipeline, parallel, combiner));
     }
 
     /**

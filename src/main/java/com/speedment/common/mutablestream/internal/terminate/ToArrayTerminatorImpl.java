@@ -3,7 +3,6 @@ package com.speedment.common.mutablestream.internal.terminate;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.ToArrayTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.function.IntFunction;
 import static java.util.Objects.requireNonNull;
 
