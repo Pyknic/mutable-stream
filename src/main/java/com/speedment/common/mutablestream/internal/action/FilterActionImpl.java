@@ -1,13 +1,12 @@
 package com.speedment.common.mutablestream.internal.action;
 
 import java.util.function.Predicate;
-import java.util.OptionalInt;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.FilterAction;
 import com.speedment.common.mutablestream.action.Action;
-import static java.util.Objects.requireNonNull;
 import java.util.stream.BaseStream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -31,12 +30,6 @@ implements FilterAction<T> {
     public Predicate<T> getPredicate() {
         return predicate;
     }
-
-    @Override
-    public OptionalInt count() {
-        // We don't know how many items will be filtered.
-        return OptionalInt.empty();
-    }
     
     @Override
     public <Q, QS extends BaseStream<Q, QS>> HasNext<Q, QS> append(Action<T, Stream<T>, Q, QS> next) {
@@ -44,7 +37,7 @@ implements FilterAction<T> {
     }
 
     @Override
-    public Stream<T> build() {
-        return previous().build().filter(predicate);
+    public Stream<T> build(boolean parallel) {
+        return previous().build(parallel).filter(predicate);
     }
 }

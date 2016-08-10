@@ -5,6 +5,7 @@ import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.ToArrayTerminator;
 import static java.util.Objects.requireNonNull;
 import java.util.function.IntFunction;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -20,8 +21,8 @@ implements ToArrayTerminator<T, A> {
 
     private final IntFunction<A[]> instantiator;
     
-    public ToArrayTerminatorImpl(HasNext<T, Stream<T>> previous, IntFunction<A[]> consumer) {
-        super(previous);
+    public ToArrayTerminatorImpl(HasNext<T, Stream<T>> previous, boolean parallel, IntFunction<A[]> consumer) {
+        super(previous, parallel);
         this.instantiator = requireNonNull(consumer);
     }
 
@@ -32,7 +33,7 @@ implements ToArrayTerminator<T, A> {
 
     @Override
     public A[] execute() {
-        try (final Stream<T> stream = previous().build()) {
+        try (final Stream<T> stream = previous().build(isParallel())) {
             return stream.toArray(instantiator);
         }
     }

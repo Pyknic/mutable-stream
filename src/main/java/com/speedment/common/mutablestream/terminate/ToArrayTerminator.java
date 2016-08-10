@@ -17,8 +17,8 @@ public interface ToArrayTerminator<T, A> extends Terminator<T, Stream<T>, A[]> {
     
     IntFunction<A[]> getInstantiator();
     
-    static <T, A> ToArrayTerminator<T, A> create(HasNext<T, Stream<T>> previous, IntFunction<A[]> instantiator) {
-        return new ToArrayTerminatorImpl<>(previous, instantiator);
+    static <T, A> ToArrayTerminator<T, A> create(HasNext<T, Stream<T>> previous, boolean parallel, IntFunction<A[]> instantiator) {
+        return new ToArrayTerminatorImpl<>(previous, parallel, instantiator);
     }
     
 }

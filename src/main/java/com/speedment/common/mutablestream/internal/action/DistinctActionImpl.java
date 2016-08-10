@@ -3,7 +3,6 @@ package com.speedment.common.mutablestream.internal.action;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.Action;
 import com.speedment.common.mutablestream.action.DistinctAction;
-import java.util.OptionalInt;
 import java.util.stream.BaseStream;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -12,8 +11,8 @@ import java.util.stream.Stream;
 
 /**
  *
- * @param <T>  the streamed type
- * @param <TS> the main stream interface
+ * @param <T>   the streamed type
+ * @param <TS>  the main stream interface
  * 
  * @author  Emil Forslund
  * @since   1.0.0
@@ -32,15 +31,9 @@ implements DistinctAction<T, TS> {
     }
 
     @Override
-    public OptionalInt count() {
-        // There is no way of knowing how many elements will be dropped.
-        return OptionalInt.empty();
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
-    public TS build() {
-        final TS built = previous().build();
+    public TS build(boolean parallel) {
+        final TS built = previous().build(parallel);
         if (built instanceof Stream<?>) {
             return (TS) ((Stream<T>) built).distinct();
         } else if (built instanceof IntStream) {

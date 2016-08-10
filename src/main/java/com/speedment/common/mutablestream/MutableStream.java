@@ -1,6 +1,5 @@
 package com.speedment.common.mutablestream;
 
-import com.speedment.common.mutablestream.action.DistinctAction;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
@@ -21,6 +20,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import com.speedment.common.mutablestream.action.DistinctAction;
 import com.speedment.common.mutablestream.action.FilterAction;
 import com.speedment.common.mutablestream.action.FlatMapAction;
 import com.speedment.common.mutablestream.action.FlatMapToIntAction;
@@ -29,10 +29,20 @@ import com.speedment.common.mutablestream.action.MapAction;
 import com.speedment.common.mutablestream.action.MapToIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
+import com.speedment.common.mutablestream.terminate.AllMatchTerminator;
+import com.speedment.common.mutablestream.terminate.AnyMatchTerminator;
 import com.speedment.common.mutablestream.terminate.CollectTerminator;
 import com.speedment.common.mutablestream.terminate.CountTerminator;
+import com.speedment.common.mutablestream.terminate.FindAnyTerminator;
+import com.speedment.common.mutablestream.terminate.FindFirstTerminator;
+import com.speedment.common.mutablestream.terminate.ForEachOrderedTerminator;
 import com.speedment.common.mutablestream.terminate.ForEachTerminator;
+import com.speedment.common.mutablestream.terminate.IteratorTerminator;
+import com.speedment.common.mutablestream.terminate.MaxTerminator;
+import com.speedment.common.mutablestream.terminate.MinTerminator;
+import com.speedment.common.mutablestream.terminate.NoneMatchTerminator;
 import com.speedment.common.mutablestream.terminate.ReduceTerminator;
+import com.speedment.common.mutablestream.terminate.SpliteratorTerminator;
 import com.speedment.common.mutablestream.terminate.ToArrayTerminator;
 import static java.util.Objects.requireNonNull;
 
@@ -45,8 +55,12 @@ import static java.util.Objects.requireNonNull;
  */
 public final class MutableStream<T> implements Stream<T> {
 
-    public static <T> Stream<T> wrap(HasNext<T, Stream<T>> builder) {
-        return new MutableStream<>(builder);
+    public static <T> Stream<T> wrap(HasNext<T, Stream<T>> pipeline) {
+        return wrap(pipeline, false);
+    }
+    
+    static <T> Stream<T> wrap(HasNext<T, Stream<T>> pipeline, boolean parallel) {
+        return new MutableStream<>(pipeline, parallel);
     }
     
     /**************************************************************************/
@@ -59,7 +73,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Stream<T> filter(Predicate<? super T> filter) {
-        return wrap(builder.append(FilterAction.create(builder, (Predicate<T>) filter)));
+        return wrap(pipeline.append(FilterAction.create(pipeline, (Predicate<T>) filter)), parallel);
     }
 
     /**
@@ -68,7 +82,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        return wrap(builder.append(MapAction.create(builder, (Function<T, R>) mapper)));
+        return wrap(pipeline.append(MapAction.create(pipeline, (Function<T, R>) mapper)), parallel);
     }
 
     /**
@@ -77,7 +91,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public IntStream mapToInt(ToIntFunction<? super T> mapper) {
-        return MutableIntStream.wrap(builder.append(MapToIntAction.create(builder, (ToIntFunction<T>) mapper)));
+        return MutableIntStream.wrap(pipeline.append(MapToIntAction.create(pipeline, (ToIntFunction<T>) mapper)), parallel);
     }
 
     /**
@@ -102,7 +116,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
-        return wrap(builder.append(FlatMapAction.create(builder, (Function<T, Stream<R>>) mapper)));
+        return wrap(pipeline.append(FlatMapAction.create(pipeline, (Function<T, Stream<R>>) mapper)), parallel);
     }
 
     /**
@@ -111,7 +125,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper) {
-        return MutableIntStream.wrap(builder.append(FlatMapToIntAction.create(builder, (Function<T, IntStream>) mapper)));
+        return MutableIntStream.wrap(pipeline.append(FlatMapToIntAction.create(pipeline, (Function<T, IntStream>) mapper)), parallel);
     }
 
     /**
@@ -135,7 +149,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> distinct() {
-        return wrap(builder.append(DistinctAction.create(builder)));
+        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
     /**
@@ -143,7 +157,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> sorted() {
-        return wrap(builder.append(SortedAction.create(builder)));
+        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
     /**
@@ -152,7 +166,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Stream<T> sorted(Comparator<? super T> comparator) {
-        return wrap(builder.append(SortedAction.create(builder, (Comparator<T>) comparator)));
+        return wrap(pipeline.append(SortedAction.create(pipeline, (Comparator<T>) comparator)), parallel);
     }
 
     /**
@@ -170,7 +184,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> limit(long limit) {
-        return wrap(builder.append(LimitAction.create(builder, limit)));
+        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
     /**
@@ -178,7 +192,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> skip(long skip) {
-        return wrap(builder.append(SkipAction.create(builder, skip)));
+        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
     
     /**************************************************************************/
@@ -189,16 +203,18 @@ public final class MutableStream<T> implements Stream<T> {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void forEach(Consumer<? super T> consumer) {
-        ForEachTerminator.create(builder, (Consumer<T>) consumer).execute();
+        pipeline.execute(ForEachTerminator.create(pipeline, parallel, (Consumer<T>) consumer));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void forEachOrdered(Consumer<? super T> consumer) {
-        sequential().forEach(consumer);
+        pipeline.execute(ForEachOrderedTerminator.create(pipeline, parallel, (Consumer<T>) consumer));
     }
 
     /**
@@ -206,7 +222,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Object[] toArray() {
-        return ToArrayTerminator.create(builder, Object[]::new).execute();
+        return pipeline.execute(ToArrayTerminator.create(pipeline, parallel, Object[]::new));
     }
 
     /**
@@ -214,7 +230,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public <A> A[] toArray(IntFunction<A[]> instantiator) {
-        return ToArrayTerminator.create(builder, instantiator).execute();
+        return pipeline.execute(ToArrayTerminator.create(pipeline, parallel, instantiator));
     }
 
     /**
@@ -222,7 +238,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public T reduce(T identity, BinaryOperator<T> combiner) {
-        return ReduceTerminator.create(builder, identity, combiner).execute();
+        return pipeline.execute(ReduceTerminator.create(pipeline, parallel, identity, combiner));
     }
 
     /**
@@ -230,7 +246,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Optional<T> reduce(BinaryOperator<T> combiner) {
-        return Optional.ofNullable(ReduceTerminator.create(builder, combiner).execute());
+        return Optional.ofNullable(pipeline.execute(ReduceTerminator.create(pipeline, parallel, combiner)));
     }
 
     /**
@@ -239,7 +255,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <U> U reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner) {
-        return ReduceTerminator.create(builder, identity, (BiFunction<U, T, U>) accumulator, combiner).execute();
+        return pipeline.execute(ReduceTerminator.create(pipeline, parallel, identity, (BiFunction<U, T, U>) accumulator, combiner));
     }
 
     /**
@@ -247,7 +263,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner) {
-        return CollectTerminator.create(builder, supplier, accumulator, combiner).execute();
+        return pipeline.execute(CollectTerminator.create(pipeline, parallel, supplier, accumulator, combiner));
     }
 
     /**
@@ -256,23 +272,25 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <R, A> R collect(Collector<? super T, A, R> collector) {
-        return CollectTerminator.create(builder, (Collector<T, A, R>) collector).execute();
+        return pipeline.execute(CollectTerminator.create(pipeline, parallel, (Collector<T, A, R>) collector));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> cmprtr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public Optional<T> min(Comparator<? super T> comparator) {
+        return pipeline.execute(MinTerminator.create(pipeline, parallel, (Comparator<T>) comparator));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> cmprtr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public Optional<T> max(Comparator<? super T> comparator) {
+        return pipeline.execute(MaxTerminator.create(pipeline, parallel, (Comparator<T>) comparator));
     }
 
     /**
@@ -280,31 +298,34 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public long count() {
-        return CountTerminator.create(builder).execute();
+        return pipeline.execute(CountTerminator.create(pipeline, parallel));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean anyMatch(Predicate<? super T> prdct) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public boolean anyMatch(Predicate<? super T> predicate) {
+        return pipeline.execute(AnyMatchTerminator.create(pipeline, parallel, (Predicate<T>) predicate));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean allMatch(Predicate<? super T> prdct) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public boolean allMatch(Predicate<? super T> predicate) {
+        return pipeline.execute(AllMatchTerminator.create(pipeline, parallel, (Predicate<T>) predicate));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean noneMatch(Predicate<? super T> prdct) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public boolean noneMatch(Predicate<? super T> predicate) {
+        return pipeline.execute(NoneMatchTerminator.create(pipeline, parallel, (Predicate<T>) predicate));
     }
     
     /**
@@ -312,7 +333,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Optional<T> findFirst() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(FindFirstTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -320,19 +341,15 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Optional<T> findAny() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(FindAnyTerminator.create(pipeline, parallel));
     }
-
-    /**************************************************************************/
-    /*                   Inherited Methods from Base Stream                   */
-    /**************************************************************************/
     
     /**
      * {@inheritDoc}
      */
     @Override
     public Iterator<T> iterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(IteratorTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -340,15 +357,19 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Spliterator<T> spliterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(SpliteratorTerminator.create(pipeline, parallel));
     }
+
+    /**************************************************************************/
+    /*                   Inherited Methods from Base Stream                   */
+    /**************************************************************************/
 
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean isParallel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parallel;
     }
 
     /**
@@ -356,7 +377,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> sequential() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parallel ? wrap(pipeline, false) : this;
     }
 
     /**
@@ -364,7 +385,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> parallel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parallel ? this : wrap(pipeline, true);
     }
 
     /**
@@ -372,7 +393,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> unordered() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this;
     }
 
     /**
@@ -380,7 +401,9 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> onClose(Runnable r) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(
+            "Close listeners are not supported by this stream implementation."
+        );
     }
 
     /**
@@ -388,16 +411,19 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public void close() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // Do nothing since close listeners are not supported by this 
+        // implementation of the stream API.
     }
 
     /**************************************************************************/
     /*                             Constructor                                */
     /**************************************************************************/
     
-    private MutableStream(HasNext<T, Stream<T>> builder) {
-        this.builder = requireNonNull(builder);
+    private MutableStream(HasNext<T, Stream<T>> pipeline, boolean parallel) {
+        this.pipeline = requireNonNull(pipeline);
+        this.parallel = parallel;
     }
     
-    private final HasNext<T, Stream<T>> builder;
+    private final HasNext<T, Stream<T>> pipeline;
+    private final boolean parallel;
 }

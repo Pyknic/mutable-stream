@@ -1,12 +1,15 @@
 package com.speedment.common.mutablestream;
 
-import static com.speedment.common.mutablestream.MutableStream.wrap;
 import com.speedment.common.mutablestream.action.DistinctAction;
+import com.speedment.common.mutablestream.action.FlatMapIntAction;
+import com.speedment.common.mutablestream.action.IntFilterAction;
 import com.speedment.common.mutablestream.action.LimitAction;
+import com.speedment.common.mutablestream.action.MapIntAction;
+import com.speedment.common.mutablestream.action.MapIntToIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
+import com.speedment.common.mutablestream.action.SortedAction;
 import com.speedment.common.mutablestream.terminate.CountTerminator;
 import java.util.IntSummaryStatistics;
-import static java.util.Objects.requireNonNull;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.PrimitiveIterator;
@@ -25,215 +28,364 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
  * @author Emil Forslund
+ * @since   1.0.0
  */
 public final class MutableIntStream implements IntStream {
     
-    public static IntStream wrap(HasNext<Integer, IntStream> builder) {
-        return new MutableIntStream(builder);
+    public static IntStream wrap(HasNext<Integer, IntStream> pipeline) {
+        return wrap(pipeline, false);
+    }
+    
+    static IntStream wrap(HasNext<Integer, IntStream> pipeline, boolean parallel) {
+        return new MutableIntStream(pipeline, parallel);
+    }
+    
+    /**************************************************************************/
+    /*                          Intermediate Actions                          */
+    /**************************************************************************/
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IntStream filter(IntPredicate filter) {
+        return wrap(pipeline.append(IntFilterAction.create(pipeline, filter)), parallel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public IntStream filter(IntPredicate ip) {
+    public IntStream map(IntUnaryOperator mapper) {
+        return wrap(pipeline.append(MapIntToIntAction.create(pipeline, mapper)), parallel);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <U> Stream<U> mapToObj(IntFunction<? extends U> mapper) {
+        return MutableStream.wrap(pipeline.append(MapIntAction.create(pipeline, (IntFunction<U>) mapper)), parallel);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LongStream mapToLong(IntToLongFunction mapper) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public IntStream map(IntUnaryOperator iuo) {
+    public DoubleStream mapToDouble(IntToDoubleFunction mapper) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public <U> Stream<U> mapToObj(IntFunction<? extends U> i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public IntStream flatMap(IntFunction<? extends IntStream> mapper) {
+        return wrap(pipeline.append(FlatMapIntAction.create(pipeline, (IntFunction<IntStream>) mapper)), parallel);
     }
 
-    @Override
-    public LongStream mapToLong(IntToLongFunction itlf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public DoubleStream mapToDouble(IntToDoubleFunction itdf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public IntStream flatMap(IntFunction<? extends IntStream> i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream distinct() {
-        return wrap(builder.append(DistinctAction.create(builder)));
+        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream sorted() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream peek(IntConsumer ic) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // Mutable Streams can not be peeked inside since they might not be
+        // resolved as a stream at all.
+        return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream limit(long limit) {
-        return wrap(builder.append(LimitAction.create(builder, limit)));
+        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream skip(long skip) {
-        return wrap(builder.append(SkipAction.create(builder, skip)));
+        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
+    
+    /**************************************************************************/
+    /*                          Terminating Actions                           */
+    /**************************************************************************/
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void forEach(IntConsumer ic) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void forEachOrdered(IntConsumer ic) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int[] toArray() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int reduce(int i, IntBinaryOperator ibo) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalInt reduce(IntBinaryOperator ibo) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <R> R collect(Supplier<R> splr, ObjIntConsumer<R> oic, BiConsumer<R, R> bc) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int sum() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalInt min() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalInt max() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long count() {
-        return CountTerminator.create(builder).execute();
+        return pipeline.execute(CountTerminator.create(pipeline, parallel));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalDouble average() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntSummaryStatistics summaryStatistics() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean anyMatch(IntPredicate ip) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean allMatch(IntPredicate ip) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean noneMatch(IntPredicate ip) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalInt findFirst() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public OptionalInt findAny() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LongStream asLongStream() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return mapToLong(i -> i);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DoubleStream asDoubleStream() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return mapToDouble(i -> i);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Stream<Integer> boxed() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return mapToObj(i -> i);
     }
 
-    @Override
-    public IntStream sequential() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public IntStream parallel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PrimitiveIterator.OfInt iterator() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Spliterator.OfInt spliterator() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
+    /**************************************************************************/
+    /*                   Inherited Methods from Base Stream                   */
+    /**************************************************************************/
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isParallel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parallel;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IntStream sequential() {
+        return parallel ? wrap(pipeline, false) : this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IntStream parallel() {
+        return parallel ? this : wrap(pipeline, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream unordered() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IntStream onClose(Runnable r) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(
+            "Close listeners are not supported by this stream implementation."
+        );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void close() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // Do nothing since close listeners are not supported by this 
+        // implementation of the stream API.
     }
     
-    private MutableIntStream(HasNext<Integer, IntStream> builder) {
-        this.builder = requireNonNull(builder);
+    /**************************************************************************/
+    /*                             Constructor                                */
+    /**************************************************************************/
+    
+    private MutableIntStream(HasNext<Integer, IntStream> pipeline, boolean parallel) {
+        this.pipeline = requireNonNull(pipeline);
+        this.parallel = parallel;
     }
     
-    private final HasNext<Integer, IntStream> builder;
+    private final HasNext<Integer, IntStream> pipeline;
+    private final boolean parallel;
 }

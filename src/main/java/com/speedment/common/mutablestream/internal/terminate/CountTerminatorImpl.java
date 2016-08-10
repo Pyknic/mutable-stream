@@ -20,14 +20,14 @@ public final class CountTerminatorImpl<T, TS extends BaseStream<T, TS>>
 extends AbstractTerminator<T, TS, Long> 
 implements CountTerminator<T, TS> {
 
-    public CountTerminatorImpl(HasNext<T, TS> previous) {
-        super(previous);
+    public CountTerminatorImpl(HasNext<T, TS> previous, boolean parallel) {
+        super(previous, parallel);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Long execute() {
-        try (final TS built = previous().build()) {
+        try (final TS built = previous().build(isParallel())) {
             if (built instanceof Stream<?>) {
                 return ((Stream<T>) built).count();
             } else if (built instanceof IntStream) {

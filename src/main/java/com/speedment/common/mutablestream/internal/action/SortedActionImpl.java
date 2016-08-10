@@ -1,6 +1,5 @@
 package com.speedment.common.mutablestream.internal.action;
 
-import java.util.OptionalInt;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.Action;
@@ -35,12 +34,6 @@ implements SortedAction<T, TS> {
     public Optional<Comparator<T>> getComparator() {
         return Optional.ofNullable(comparator);
     }
-
-    @Override
-    public OptionalInt count() {
-        // Sorting does not affect the count.
-        return previous().count();
-    }
     
     @Override
     public <Q, QS extends BaseStream<Q, QS>> HasNext<Q, QS> append(Action<T, TS, Q, QS> next) {
@@ -49,8 +42,8 @@ implements SortedAction<T, TS> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public TS build() {
-        final TS built = previous().build();
+    public TS build(boolean parallel) {
+        final TS built = previous().build(parallel);
         if (built instanceof Stream<?>) {
             if (comparator == null) {
                 return (TS) ((Stream<T>) built).sorted();

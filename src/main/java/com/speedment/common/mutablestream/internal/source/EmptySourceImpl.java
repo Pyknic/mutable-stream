@@ -3,9 +3,13 @@ package com.speedment.common.mutablestream.internal.source;
 import com.speedment.common.mutablestream.action.Action;
 import com.speedment.common.mutablestream.source.EmptySource;
 import com.speedment.common.mutablestream.HasNext;
-import java.util.OptionalInt;
+import com.speedment.common.mutablestream.terminate.Terminator;
 import java.util.stream.BaseStream;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -17,7 +21,11 @@ import java.util.stream.Stream;
  */
 public final class EmptySourceImpl<T, TS extends BaseStream<T, TS>> implements EmptySource<T, TS> {
     
-    private final static OptionalInt ZERO = OptionalInt.of(0);
+    private final Class<TS> streamType;
+    
+    public EmptySourceImpl(Class<TS> streamType) {
+        this.streamType = requireNonNull(streamType);
+    }
 
     @Override
     public <Q, QS extends BaseStream<Q, QS>> HasNext<Q, QS> append(Action<T, TS, Q, QS> next) {
@@ -27,12 +35,32 @@ public final class EmptySourceImpl<T, TS extends BaseStream<T, TS>> implements E
     }
 
     @Override
-    public OptionalInt count() {
-        return ZERO;
+    public <X> X execute(Terminator<T, TS, X> terminator) {
+        return terminator.execute();
     }
 
     @Override
-    public TS build() {
-        return (TS) Stream.empty();
+    public TS build(boolean parallel) {
+        if (Stream.class.equals(streamType)) {
+            @SuppressWarnings("unchecked")
+            final TS result = (TS) Stream.empty();
+            return result;
+        } else if (IntStream.class.equals(streamType)) {
+            @SuppressWarnings("unchecked")
+            final TS result = (TS) IntStream.empty();
+            return result;
+        } else if (LongStream.class.equals(streamType)) {
+            @SuppressWarnings("unchecked")
+            final TS result = (TS) LongStream.empty();
+            return result;
+        } else if (DoubleStream.class.equals(streamType)) {
+            @SuppressWarnings("unchecked")
+            final TS result = (TS) DoubleStream.empty();
+            return result;
+        } else {
+            throw new UnsupportedOperationException(
+                "Unknown stream type '" + streamType.getName() + "'."
+            );
+        }
     }
 }

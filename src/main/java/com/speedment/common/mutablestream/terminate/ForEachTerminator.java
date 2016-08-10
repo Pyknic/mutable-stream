@@ -16,7 +16,7 @@ public interface ForEachTerminator<T> extends Terminator<T, Stream<T>, Void> {
 
     Consumer<T> getConsumer();
     
-    static <T> ForEachTerminator<T> create(HasNext<T, Stream<T>> previous, Consumer<T> consumer) {
-        return new ForEachTerminatorImpl<>(previous, consumer);
+    static <T> ForEachTerminator<T> create(HasNext<T, Stream<T>> previous, boolean parallel, Consumer<T> consumer) {
+        return new ForEachTerminatorImpl<>(previous, parallel, consumer);
     }
 }

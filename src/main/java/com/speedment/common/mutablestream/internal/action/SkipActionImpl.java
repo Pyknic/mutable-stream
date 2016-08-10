@@ -1,15 +1,14 @@
 package com.speedment.common.mutablestream.internal.action;
 
-import java.util.OptionalInt;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.Action;
 import com.speedment.common.mutablestream.action.SkipAction;
-import static java.util.Objects.requireNonNull;
 import java.util.stream.BaseStream;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -34,23 +33,6 @@ implements SkipAction<T, TS> {
     public long getSkip() {
         return skip;
     }
-
-    @Override
-    public OptionalInt count() {
-        // If the preceeding action had a fixed count, reduce that count with
-        // the skip to determine the count after this action.
-        final OptionalInt previousLength = previous().count();
-        if (previousLength.isPresent()) {
-            return OptionalInt.of(
-                // Avoid negative numbers.
-                (int) Math.max(previousLength.getAsInt() - skip, 0)
-            );
-            
-        // Otherwise, we don't know the count.
-        } else {
-            return OptionalInt.empty();
-        }
-    }
     
     @Override
     public <Q, QS extends BaseStream<Q, QS>> HasNext<Q, QS> append(Action<T, TS, Q, QS> next) {
@@ -59,8 +41,8 @@ implements SkipAction<T, TS> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public TS build() {
-        final TS built = previous().build();
+    public TS build(boolean parallel) {
+        final TS built = previous().build(parallel);
         if (built instanceof Stream<?>) {
             return (TS) ((Stream<T>) built).skip(skip);
         } else if (built instanceof IntStream) {

@@ -14,6 +14,8 @@ import java.util.stream.BaseStream;
  */
 public interface Terminator<T, TS extends BaseStream<T, TS>, R> extends HasPrevious<T, TS> {
 
+    boolean isParallel();
+    
     R execute();
     
 }

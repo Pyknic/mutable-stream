@@ -1,36 +1,36 @@
 package com.speedment.common.mutablestream.internal.action;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.Action;
 import com.speedment.common.mutablestream.action.LimitAction;
-import com.speedment.common.mutablestream.action.MapAction;
+import com.speedment.common.mutablestream.action.MapIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
+import java.util.function.IntFunction;
 import java.util.stream.BaseStream;
+import java.util.stream.IntStream;
 import static java.util.Objects.requireNonNull;
 
 /**
  *
- * @param <T>  the ingoing type
  * @param <R>  the outgoing type
  * 
  * @author  Emil Forslund
  * @since   1.0.0
  */
-public final class MapActionImpl<T, R> 
-extends AbstractAction<T, Stream<T>, R, Stream<R>> 
-implements MapAction<T, R> {
+public final class MapIntActionImpl<R> 
+extends AbstractAction<Integer, IntStream, R, Stream<R>> 
+implements MapIntAction<R> {
     
-    private final Function<T, R> mapper;
+    private final IntFunction<R> mapper;
 
-    public MapActionImpl(HasNext<T, Stream<T>> previous, Function<T, R> mapper) {
+    public MapIntActionImpl(HasNext<Integer, IntStream> previous, IntFunction<R> mapper) {
         super(previous);
         this.mapper = requireNonNull(mapper);
     }
     
     @Override
-    public Function<T, R> getMapper() {
+    public IntFunction<R> getMapper() {
         return mapper;
     }
 
@@ -40,9 +40,9 @@ implements MapAction<T, R> {
         // is executed first.
         return next.ifLimit().map(limit -> {
             
-            final LimitAction<T, Stream<T>> newLimit = LimitAction.create(previous(), limit.getLimit());
-            final HasNext<T, Stream<T>> newPrevious = previous().append(newLimit);
-            final MapAction<T, R> newMap = MapAction.create(newPrevious, mapper);
+            final LimitAction<Integer, IntStream> newLimit = LimitAction.create(previous(), limit.getLimit());
+            final HasNext<Integer, IntStream> newPrevious = previous().append(newLimit);
+            final MapIntAction<R> newMap = MapIntAction.create(newPrevious, mapper);
             
             @SuppressWarnings("unchecked")
             final HasNext<Q, QS> result = (HasNext<Q, QS>) newPrevious.append(newMap);
@@ -53,9 +53,9 @@ implements MapAction<T, R> {
         // is executed first.
         }).orElseGet(() -> next.ifSkip().map(skip -> {
             
-            final SkipAction<T, Stream<T>> newSkip = SkipAction.create(previous(), skip.getSkip());
-            final HasNext<T, Stream<T>> newPrevious = previous().append(newSkip);
-            final MapAction<T, R> newMap = MapAction.create(newPrevious, mapper);
+            final SkipAction<Integer, IntStream> newSkip = SkipAction.create(previous(), skip.getSkip());
+            final HasNext<Integer, IntStream> newPrevious = previous().append(newSkip);
+            final MapIntAction<R> newMap = MapIntAction.create(newPrevious, mapper);
 
             @SuppressWarnings("unchecked")
             final HasNext<Q, QS> result = (HasNext<Q, QS>) newPrevious.append(newMap);
@@ -69,6 +69,6 @@ implements MapAction<T, R> {
 
     @Override
     public Stream<R> build(boolean parallel) {
-        return previous().build(parallel).map(mapper);
+        return previous().build(parallel).mapToObj(mapper);
     }
 }

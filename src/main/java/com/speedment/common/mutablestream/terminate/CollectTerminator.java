@@ -22,6 +22,7 @@ public interface CollectTerminator<T, A, R> extends Terminator<T, Stream<T>, R> 
     
     static <T, R> CollectTerminator<T, R, R> create(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel,
             Supplier<R> supplier, 
             BiConsumer<R, ? super T> accumulator, 
             BiConsumer<R, R> combiner) {
@@ -33,13 +34,14 @@ public interface CollectTerminator<T, A, R> extends Terminator<T, Stream<T>, R> 
                 return a;
             });
         
-        return create(previous, collector);
+        return create(previous, parallel, collector);
     }
     
     static <T, A, R> CollectTerminator<T, A, R> create(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel,
             Collector<T, A, R> collector) {
         
-        return new CollectTerminatorImpl<>(previous, collector);
+        return new CollectTerminatorImpl<>(previous, parallel, collector);
     }
 }

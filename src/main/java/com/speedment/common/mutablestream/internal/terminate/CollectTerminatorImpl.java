@@ -5,6 +5,7 @@ import com.speedment.common.mutablestream.terminate.CollectTerminator;
 import static java.util.Objects.requireNonNull;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -21,8 +22,8 @@ implements CollectTerminator<T, A, R> {
     
     private final Collector<T, A, R> collector;
 
-    public CollectTerminatorImpl(HasNext<T, Stream<T>> previous, Collector<T, A, R> collector) {
-        super(previous);
+    public CollectTerminatorImpl(HasNext<T, Stream<T>> previous, boolean parallel, Collector<T, A, R> collector) {
+        super(previous, parallel);
         this.collector = requireNonNull(collector);
     }
     
@@ -33,7 +34,7 @@ implements CollectTerminator<T, A, R> {
 
     @Override
     public R execute() {
-        try (final Stream<T> stream = previous().build()) {
+        try (final Stream<T> stream = previous().build(isParallel())) {
             return stream.collect(collector);
         }
     }

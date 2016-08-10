@@ -25,23 +25,26 @@ public interface ReduceTerminator<T, U> extends Terminator<T, Stream<T>, U> {
     
     static <T> ReduceTerminator<T, T> create(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel, 
             BinaryOperator<T> combiner) {
-        return new ReduceTerminatorImpl<>(previous, null, null, combiner);
+        return new ReduceTerminatorImpl<>(previous, parallel, null, null, combiner);
     }
     
     static <T> ReduceTerminator<T, T> create(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel, 
             T identity, 
             BinaryOperator<T> combiner) {
-        return new ReduceTerminatorImpl<>(previous, identity, null, combiner);
+        return new ReduceTerminatorImpl<>(previous, parallel, identity, null, combiner);
     }
     
     static <T, U> ReduceTerminator<T, U> create(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel, 
             U identity, 
             BiFunction<U, T, U> accumulator, 
             BinaryOperator<U> combiner) {
-        return new ReduceTerminatorImpl<>(previous, identity, accumulator, combiner);
+        return new ReduceTerminatorImpl<>(previous, parallel, identity, accumulator, combiner);
     }
     
 }

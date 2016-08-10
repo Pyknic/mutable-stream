@@ -1,11 +1,16 @@
 package com.speedment.common.mutablestream;
 
-import java.util.OptionalInt;
 import com.speedment.common.mutablestream.action.Action;
+import com.speedment.common.mutablestream.terminate.Terminator;
 import java.util.stream.BaseStream;
 
 /**
- *
+ * A pipeline action that can be followed up by another action. This can be
+ * either an intermediary or a source action.
+ * <p>
+ * Implementations of this interface should be <em>immutable</em> and contain
+ * publically accessible getters for all the metadata nescessary to execute it.
+ * 
  * @param <R>   the outgoing type
  * @param <RS>  the type of the outgoing stream
  * 
@@ -14,10 +19,41 @@ import java.util.stream.BaseStream;
  */
 public interface HasNext<R, RS extends BaseStream<R, RS>> {
     
+    /**
+     * Returns an action that fulfills both everything that this action does and
+     * everything that the specified action does. The result can either (i) be
+     * the action specified or (ii) a reference to this action if this can
+     * accomplish both tasks.
+     * <p>
+     * Actions used as parameter to this method should already have this 
+     * instance set as it's 'previous' action upon calling this method.
+     * 
+     * @param <Q>   the outgoing type after this method has been applied
+     * @param <QS>  the stream type after this method has been applied
+     * @param next  the action to append to the pipeline
+     * @return      an appended pipeline
+     */
     <Q, QS extends BaseStream<Q, QS>> HasNext<Q, QS> append(Action<R, RS, Q, QS> next);
     
-    OptionalInt count();
+    /**
+     * Executes the specified terminator on this pipeline. If this action can
+     * fully execute the specified action without calling it's
+     * {@link Terminator#execute()}-method it may do so, as long as the result 
+     * returns is equivalent to what the terminator would have returned.
+     * 
+     * @param <X>         the result type returned by the terminator
+     * @param terminator  the terminator for this pipeline
+     * @return            a result from terminating the pipeline
+     */
+    <X> X execute(Terminator<R, RS, X> terminator);
     
-    RS build();
+    /**
+     * Builds a standard java stream from the pipeline. Streams can be built
+     * either as sequential or parallel.
+     * 
+     * @param parallel  if the built pipeline should be a parallel stream
+     * @return          the built stream
+     */
+    RS build(boolean parallel);
     
 }

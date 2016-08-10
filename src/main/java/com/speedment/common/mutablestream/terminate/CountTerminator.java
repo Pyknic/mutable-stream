@@ -14,7 +14,7 @@ import java.util.stream.BaseStream;
  */
 public interface CountTerminator<T, TS extends BaseStream<T, TS>> extends Terminator<T, TS, Long> {
     
-    static <T, TS extends BaseStream<T, TS>> CountTerminator<T, TS> create(HasNext<T, TS> previous) {
-        return new CountTerminatorImpl<>(previous);
+    static <T, TS extends BaseStream<T, TS>> CountTerminator<T, TS> create(HasNext<T, TS> previous, boolean parallel) {
+        return new CountTerminatorImpl<>(previous, parallel);
     }
 }

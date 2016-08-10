@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -26,11 +27,12 @@ implements ReduceTerminator<T, U> {
 
     public ReduceTerminatorImpl(
             HasNext<T, Stream<T>> previous, 
+            boolean parallel,
             U identity, 
             BiFunction<U, T, U> accumulator, 
             BinaryOperator<U> combiner) {
         
-        super(previous);
+        super(previous, parallel);
         this.identity    = identity;     // Can be null.
         this.accumulator = accumulator;  // Can be null.
         this.combiner    = requireNonNull(combiner); 
@@ -54,7 +56,7 @@ implements ReduceTerminator<T, U> {
     @Override
     @SuppressWarnings("unchecked")
     public U execute() {
-        try (final Stream<T> stream = previous().build()) {
+        try (final Stream<T> stream = previous().build(isParallel())) {
             if (accumulator == null) { // T and U are the same.
                 final BinaryOperator<T> tCombiner = (BinaryOperator<T>) combiner;
                 

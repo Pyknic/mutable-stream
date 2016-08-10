@@ -16,9 +16,16 @@ import java.util.stream.BaseStream;
 abstract class AbstractTerminator<T, TS extends BaseStream<T, TS>, R> implements Terminator<T, TS, R> {
     
     private final HasNext<T, TS> previous;
+    private final boolean parallel;
     
-    protected AbstractTerminator(HasNext<T, TS> previous) {
+    protected AbstractTerminator(HasNext<T, TS> previous, boolean parallel) {
         this.previous = requireNonNull(previous);
+        this.parallel = parallel;
+    }
+
+    @Override
+    public boolean isParallel() {
+        return parallel;
     }
     
     @Override

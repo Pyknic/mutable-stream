@@ -2,6 +2,7 @@ package com.speedment.common.mutablestream.internal.action;
 
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.action.Action;
+import com.speedment.common.mutablestream.terminate.Terminator;
 import static java.util.Objects.requireNonNull;
 import java.util.stream.BaseStream;
 
@@ -27,5 +28,10 @@ abstract class AbstractAction<
     @Override
     public final HasNext<T, TS> previous() {
         return previous;
+    }
+
+    @Override
+    public <X> X execute(Terminator<R, RS, X> terminator) {
+        return terminator.execute();
     }
 }
