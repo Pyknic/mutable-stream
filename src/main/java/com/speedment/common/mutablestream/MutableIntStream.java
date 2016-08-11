@@ -5,7 +5,9 @@ import com.speedment.common.mutablestream.action.FlatMapIntAction;
 import com.speedment.common.mutablestream.action.IntFilterAction;
 import com.speedment.common.mutablestream.action.LimitAction;
 import com.speedment.common.mutablestream.action.MapIntAction;
+import com.speedment.common.mutablestream.action.MapIntToDoubleAction;
 import com.speedment.common.mutablestream.action.MapIntToIntAction;
+import com.speedment.common.mutablestream.action.MapIntToLongAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
 import com.speedment.common.mutablestream.terminate.AllMatchIntTerminator;
@@ -96,7 +98,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public LongStream mapToLong(IntToLongFunction mapper) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return MutableLongStream.wrap(pipeline.append(MapIntToLongAction.create(pipeline, (IntToLongFunction) mapper)), parallel);
     }
 
     /**
@@ -104,7 +106,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public DoubleStream mapToDouble(IntToDoubleFunction mapper) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return MutableDoubleStream.wrap(pipeline.append(MapIntToDoubleAction.create(pipeline, (IntToDoubleFunction) mapper)), parallel);
     }
 
     /**

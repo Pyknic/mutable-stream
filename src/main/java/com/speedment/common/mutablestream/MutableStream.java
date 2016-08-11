@@ -23,10 +23,14 @@ import java.util.stream.Stream;
 import com.speedment.common.mutablestream.action.DistinctAction;
 import com.speedment.common.mutablestream.action.FilterAction;
 import com.speedment.common.mutablestream.action.FlatMapAction;
+import com.speedment.common.mutablestream.action.FlatMapToDoubleAction;
 import com.speedment.common.mutablestream.action.FlatMapToIntAction;
+import com.speedment.common.mutablestream.action.FlatMapToLongAction;
 import com.speedment.common.mutablestream.action.LimitAction;
 import com.speedment.common.mutablestream.action.MapAction;
+import com.speedment.common.mutablestream.action.MapToDoubleAction;
 import com.speedment.common.mutablestream.action.MapToIntAction;
+import com.speedment.common.mutablestream.action.MapToLongAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
 import com.speedment.common.mutablestream.terminate.AllMatchTerminator;
@@ -98,16 +102,18 @@ public final class MutableStream<T> implements Stream<T> {
      * {@inheritDoc}
      */
     @Override
-    public LongStream mapToLong(ToLongFunction<? super T> tlf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public LongStream mapToLong(ToLongFunction<? super T> mapper) {
+        return MutableLongStream.wrap(pipeline.append(MapToLongAction.create(pipeline, (ToLongFunction<T>) mapper)), parallel);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DoubleStream mapToDouble(ToDoubleFunction<? super T> tdf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper) {
+        return MutableDoubleStream.wrap(pipeline.append(MapToDoubleAction.create(pipeline, (ToDoubleFunction<T>) mapper)), parallel);
     }
 
     /**
@@ -132,16 +138,18 @@ public final class MutableStream<T> implements Stream<T> {
      * {@inheritDoc}
      */
     @Override
-    public LongStream flatMapToLong(Function<? super T, ? extends LongStream> fnctn) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public LongStream flatMapToLong(Function<? super T, ? extends LongStream> mapper) {
+        return MutableLongStream.wrap(pipeline.append(FlatMapToLongAction.create(pipeline, (Function<T, LongStream>) mapper)), parallel);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> fnctn) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @SuppressWarnings("unchecked")
+    public DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> mapper) {
+        return MutableDoubleStream.wrap(pipeline.append(FlatMapToDoubleAction.create(pipeline, (Function<T, DoubleStream>) mapper)), parallel);
     }
 
     /**

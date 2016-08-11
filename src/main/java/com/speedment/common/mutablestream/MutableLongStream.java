@@ -5,6 +5,8 @@ import com.speedment.common.mutablestream.action.FlatMapLongAction;
 import com.speedment.common.mutablestream.action.LongFilterAction;
 import com.speedment.common.mutablestream.action.LimitAction;
 import com.speedment.common.mutablestream.action.MapLongAction;
+import com.speedment.common.mutablestream.action.MapLongToDoubleAction;
+import com.speedment.common.mutablestream.action.MapLongToIntAction;
 import com.speedment.common.mutablestream.action.MapLongToLongAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
@@ -96,7 +98,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public IntStream mapToInt(LongToIntFunction mapper) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return MutableIntStream.wrap(pipeline.append(MapLongToIntAction.create(pipeline, (LongToIntFunction) mapper)), parallel);
     }
 
     /**
@@ -104,7 +106,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public DoubleStream mapToDouble(LongToDoubleFunction mapper) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return MutableDoubleStream.wrap(pipeline.append(MapLongToDoubleAction.create(pipeline, (LongToDoubleFunction) mapper)), parallel);
     }
 
     /**
