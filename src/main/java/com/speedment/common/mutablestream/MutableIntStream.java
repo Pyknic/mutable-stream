@@ -8,10 +8,21 @@ import com.speedment.common.mutablestream.action.MapIntAction;
 import com.speedment.common.mutablestream.action.MapIntToIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
+import com.speedment.common.mutablestream.terminate.AllMatchIntTerminator;
+import com.speedment.common.mutablestream.terminate.AnyMatchIntTerminator;
+import com.speedment.common.mutablestream.terminate.AverageTerminator;
 import com.speedment.common.mutablestream.terminate.CollectIntTerminator;
 import com.speedment.common.mutablestream.terminate.CountTerminator;
+import com.speedment.common.mutablestream.terminate.FindAnyIntTerminator;
+import com.speedment.common.mutablestream.terminate.FindFirstIntTerminator;
 import com.speedment.common.mutablestream.terminate.ForEachIntOrderedTerminator;
 import com.speedment.common.mutablestream.terminate.ForEachIntTerminator;
+import com.speedment.common.mutablestream.terminate.IntIteratorTerminator;
+import com.speedment.common.mutablestream.terminate.IntSpliteratorTerminator;
+import com.speedment.common.mutablestream.terminate.IntSummaryStatisticsTerminator;
+import com.speedment.common.mutablestream.terminate.MaxIntTerminator;
+import com.speedment.common.mutablestream.terminate.MinIntTerminator;
+import com.speedment.common.mutablestream.terminate.NoneMatchIntTerminator;
 import com.speedment.common.mutablestream.terminate.ReduceIntTerminator;
 import com.speedment.common.mutablestream.terminate.ToIntArrayTerminator;
 import java.util.IntSummaryStatistics;
@@ -33,6 +44,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import com.speedment.common.mutablestream.terminate.SumIntTerminator;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -146,6 +158,30 @@ public final class MutableIntStream implements IntStream {
         return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LongStream asLongStream() {
+        return mapToLong(i -> i);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DoubleStream asDoubleStream() {
+        return mapToDouble(i -> i);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<Integer> boxed() {
+        return mapToObj(i -> i);
+    }
+    
     /**************************************************************************/
     /*                          Terminating Actions                           */
     /**************************************************************************/
@@ -203,7 +239,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public int sum() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(SumIntTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -211,7 +247,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public OptionalInt min() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(MinIntTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -219,7 +255,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public OptionalInt max() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(MaxIntTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -235,7 +271,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public OptionalDouble average() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(AverageTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -243,31 +279,31 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntSummaryStatistics summaryStatistics() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(IntSummaryStatisticsTerminator.create(pipeline, parallel));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean anyMatch(IntPredicate ip) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean anyMatch(IntPredicate predicate) {
+        return pipeline.execute(AnyMatchIntTerminator.create(pipeline, parallel, predicate));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean allMatch(IntPredicate ip) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean allMatch(IntPredicate predicate) {
+        return pipeline.execute(AllMatchIntTerminator.create(pipeline, parallel, predicate));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean noneMatch(IntPredicate ip) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean noneMatch(IntPredicate predicate) {
+        return pipeline.execute(NoneMatchIntTerminator.create(pipeline, parallel, predicate));
     }
 
     /**
@@ -275,7 +311,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public OptionalInt findFirst() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(FindFirstIntTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -283,31 +319,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public OptionalInt findAny() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public LongStream asLongStream() {
-        return mapToLong(i -> i);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DoubleStream asDoubleStream() {
-        return mapToDouble(i -> i);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<Integer> boxed() {
-        return mapToObj(i -> i);
+        return pipeline.execute(FindAnyIntTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -315,7 +327,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public PrimitiveIterator.OfInt iterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(IntIteratorTerminator.create(pipeline, parallel));
     }
 
     /**
@@ -323,7 +335,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public Spliterator.OfInt spliterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pipeline.execute(IntSpliteratorTerminator.create(pipeline, parallel));
     }
 
     
