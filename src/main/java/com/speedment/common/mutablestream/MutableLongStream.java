@@ -45,9 +45,9 @@ import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.terminate.SumLongTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.function.LongToIntFunction;
 import java.util.stream.IntStream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -57,10 +57,10 @@ import java.util.stream.IntStream;
 public final class MutableLongStream implements LongStream {
     
     public static LongStream wrap(HasNext<Long, LongStream> pipeline) {
-        return wrap(pipeline, false);
+        return internalWrap(pipeline, false);
     }
     
-    static LongStream wrap(HasNext<Long, LongStream> pipeline, boolean parallel) {
+    static LongStream internalWrap(HasNext<Long, LongStream> pipeline, boolean parallel) {
         return new MutableLongStream(pipeline, parallel);
     }
     
@@ -73,7 +73,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream filter(LongPredicate filter) {
-        return wrap(pipeline.append(LongFilterAction.create(pipeline, filter)), parallel);
+        return internalWrap(pipeline.append(LongFilterAction.create(pipeline, filter)), parallel);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream map(LongUnaryOperator mapper) {
-        return wrap(pipeline.append(MapLongToLongAction.create(pipeline, mapper)), parallel);
+        return internalWrap(pipeline.append(MapLongToLongAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class MutableLongStream implements LongStream {
     @Override
     @SuppressWarnings("unchecked")
     public <U> Stream<U> mapToObj(LongFunction<? extends U> mapper) {
-        return MutableStream.wrap(pipeline.append(MapLongAction.create(pipeline, (LongFunction<U>) mapper)), parallel);
+        return MutableStream.internalWrap(pipeline.append(MapLongAction.create(pipeline, (LongFunction<U>) mapper)), parallel);
     }
 
     /**
@@ -98,7 +98,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public IntStream mapToInt(LongToIntFunction mapper) {
-        return MutableIntStream.wrap(pipeline.append(MapLongToIntAction.create(pipeline, mapper)), parallel);
+        return MutableIntStream.internalWrap(pipeline.append(MapLongToIntAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -106,7 +106,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public DoubleStream mapToDouble(LongToDoubleFunction mapper) {
-        return MutableDoubleStream.wrap(pipeline.append(MapLongToDoubleAction.create(pipeline, mapper)), parallel);
+        return MutableDoubleStream.internalWrap(pipeline.append(MapLongToDoubleAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class MutableLongStream implements LongStream {
     @Override
     @SuppressWarnings("unchecked")
     public LongStream flatMap(LongFunction<? extends LongStream> mapper) {
-        return wrap(pipeline.append(FlatMapLongAction.create(pipeline, (LongFunction<LongStream>) mapper)), parallel);
+        return internalWrap(pipeline.append(FlatMapLongAction.create(pipeline, (LongFunction<LongStream>) mapper)), parallel);
     }
 
     /**
@@ -123,7 +123,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream distinct() {
-        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
     /**
@@ -131,7 +131,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream sorted() {
-        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
     /**
@@ -149,7 +149,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream limit(long limit) {
-        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
+        return internalWrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream skip(long skip) {
-        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
+        return internalWrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
 
     /**
@@ -350,7 +350,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream sequential() {
-        return parallel ? wrap(pipeline, false) : this;
+        return parallel ? internalWrap(pipeline, false) : this;
     }
 
     /**
@@ -358,7 +358,7 @@ public final class MutableLongStream implements LongStream {
      */
     @Override
     public LongStream parallel() {
-        return parallel ? this : wrap(pipeline, true);
+        return parallel ? this : internalWrap(pipeline, true);
     }
 
     /**

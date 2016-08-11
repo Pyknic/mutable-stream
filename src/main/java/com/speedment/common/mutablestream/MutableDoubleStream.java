@@ -44,9 +44,9 @@ import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import com.speedment.common.mutablestream.terminate.SumDoubleTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.function.DoubleToIntFunction;
 import java.util.stream.IntStream;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -56,10 +56,10 @@ import java.util.stream.IntStream;
 public final class MutableDoubleStream implements DoubleStream {
     
     public static DoubleStream wrap(HasNext<Double, DoubleStream> pipeline) {
-        return wrap(pipeline, false);
+        return internalWrap(pipeline, false);
     }
     
-    static DoubleStream wrap(HasNext<Double, DoubleStream> pipeline, boolean parallel) {
+    static DoubleStream internalWrap(HasNext<Double, DoubleStream> pipeline, boolean parallel) {
         return new MutableDoubleStream(pipeline, parallel);
     }
     
@@ -72,7 +72,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream filter(DoublePredicate filter) {
-        return wrap(pipeline.append(DoubleFilterAction.create(pipeline, filter)), parallel);
+        return internalWrap(pipeline.append(DoubleFilterAction.create(pipeline, filter)), parallel);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream map(DoubleUnaryOperator mapper) {
-        return wrap(pipeline.append(MapDoubleToDoubleAction.create(pipeline, mapper)), parallel);
+        return internalWrap(pipeline.append(MapDoubleToDoubleAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -89,7 +89,7 @@ public final class MutableDoubleStream implements DoubleStream {
     @Override
     @SuppressWarnings("unchecked")
     public <U> Stream<U> mapToObj(DoubleFunction<? extends U> mapper) {
-        return MutableStream.wrap(pipeline.append(MapDoubleAction.create(pipeline, (DoubleFunction<U>) mapper)), parallel);
+        return MutableStream.internalWrap(pipeline.append(MapDoubleAction.create(pipeline, (DoubleFunction<U>) mapper)), parallel);
     }
 
     /**
@@ -97,7 +97,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public LongStream mapToLong(DoubleToLongFunction mapper) {
-        return MutableLongStream.wrap(pipeline.append(MapDoubleToLongAction.create(pipeline, mapper)), parallel);
+        return MutableLongStream.internalWrap(pipeline.append(MapDoubleToLongAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public IntStream mapToInt(DoubleToIntFunction mapper) {
-        return MutableIntStream.wrap(pipeline.append(MapDoubleToIntAction.create(pipeline, mapper)), parallel);
+        return MutableIntStream.internalWrap(pipeline.append(MapDoubleToIntAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -114,7 +114,7 @@ public final class MutableDoubleStream implements DoubleStream {
     @Override
     @SuppressWarnings("unchecked")
     public DoubleStream flatMap(DoubleFunction<? extends DoubleStream> mapper) {
-        return wrap(pipeline.append(FlatMapDoubleAction.create(pipeline, (DoubleFunction<DoubleStream>) mapper)), parallel);
+        return internalWrap(pipeline.append(FlatMapDoubleAction.create(pipeline, (DoubleFunction<DoubleStream>) mapper)), parallel);
     }
 
     /**
@@ -122,7 +122,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream distinct() {
-        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
     /**
@@ -130,7 +130,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream sorted() {
-        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
     /**
@@ -148,7 +148,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream limit(long limit) {
-        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
+        return internalWrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
     /**
@@ -156,7 +156,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream skip(long skip) {
-        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
+        return internalWrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
     
     /**
@@ -341,7 +341,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream sequential() {
-        return parallel ? wrap(pipeline, false) : this;
+        return parallel ? internalWrap(pipeline, false) : this;
     }
 
     /**
@@ -349,7 +349,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public DoubleStream parallel() {
-        return parallel ? this : wrap(pipeline, true);
+        return parallel ? this : internalWrap(pipeline, true);
     }
 
     /**

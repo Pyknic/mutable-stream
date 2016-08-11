@@ -57,10 +57,10 @@ import static java.util.Objects.requireNonNull;
 public final class MutableIntStream implements IntStream {
     
     public static IntStream wrap(HasNext<Integer, IntStream> pipeline) {
-        return wrap(pipeline, false);
+        return internalWrap(pipeline, false);
     }
     
-    static IntStream wrap(HasNext<Integer, IntStream> pipeline, boolean parallel) {
+    static IntStream internalWrap(HasNext<Integer, IntStream> pipeline, boolean parallel) {
         return new MutableIntStream(pipeline, parallel);
     }
     
@@ -73,7 +73,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream filter(IntPredicate filter) {
-        return wrap(pipeline.append(IntFilterAction.create(pipeline, filter)), parallel);
+        return internalWrap(pipeline.append(IntFilterAction.create(pipeline, filter)), parallel);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream map(IntUnaryOperator mapper) {
-        return wrap(pipeline.append(MapIntToIntAction.create(pipeline, mapper)), parallel);
+        return internalWrap(pipeline.append(MapIntToIntAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class MutableIntStream implements IntStream {
     @Override
     @SuppressWarnings("unchecked")
     public <U> Stream<U> mapToObj(IntFunction<? extends U> mapper) {
-        return MutableStream.wrap(pipeline.append(MapIntAction.create(pipeline, (IntFunction<U>) mapper)), parallel);
+        return MutableStream.internalWrap(pipeline.append(MapIntAction.create(pipeline, (IntFunction<U>) mapper)), parallel);
     }
 
     /**
@@ -98,7 +98,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public LongStream mapToLong(IntToLongFunction mapper) {
-        return MutableLongStream.wrap(pipeline.append(MapIntToLongAction.create(pipeline, mapper)), parallel);
+        return MutableLongStream.internalWrap(pipeline.append(MapIntToLongAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -106,7 +106,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public DoubleStream mapToDouble(IntToDoubleFunction mapper) {
-        return MutableDoubleStream.wrap(pipeline.append(MapIntToDoubleAction.create(pipeline, mapper)), parallel);
+        return MutableDoubleStream.internalWrap(pipeline.append(MapIntToDoubleAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class MutableIntStream implements IntStream {
     @Override
     @SuppressWarnings("unchecked")
     public IntStream flatMap(IntFunction<? extends IntStream> mapper) {
-        return wrap(pipeline.append(FlatMapIntAction.create(pipeline, (IntFunction<IntStream>) mapper)), parallel);
+        return internalWrap(pipeline.append(FlatMapIntAction.create(pipeline, (IntFunction<IntStream>) mapper)), parallel);
     }
 
     /**
@@ -123,7 +123,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream distinct() {
-        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
     /**
@@ -131,7 +131,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream sorted() {
-        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
     /**
@@ -149,7 +149,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream limit(long limit) {
-        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
+        return internalWrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream skip(long skip) {
-        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
+        return internalWrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
     
     /**
@@ -358,7 +358,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream sequential() {
-        return parallel ? wrap(pipeline, false) : this;
+        return parallel ? internalWrap(pipeline, false) : this;
     }
 
     /**
@@ -366,7 +366,7 @@ public final class MutableIntStream implements IntStream {
      */
     @Override
     public IntStream parallel() {
-        return parallel ? this : wrap(pipeline, true);
+        return parallel ? this : internalWrap(pipeline, true);
     }
 
     /**

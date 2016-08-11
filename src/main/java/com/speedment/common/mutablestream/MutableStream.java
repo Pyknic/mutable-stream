@@ -60,10 +60,10 @@ import static java.util.Objects.requireNonNull;
 public final class MutableStream<T> implements Stream<T> {
 
     public static <T> Stream<T> wrap(HasNext<T, Stream<T>> pipeline) {
-        return wrap(pipeline, false);
+        return internalWrap(pipeline, false);
     }
     
-    static <T> Stream<T> wrap(HasNext<T, Stream<T>> pipeline, boolean parallel) {
+    static <T> Stream<T> internalWrap(HasNext<T, Stream<T>> pipeline, boolean parallel) {
         return new MutableStream<>(pipeline, parallel);
     }
     
@@ -77,7 +77,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Stream<T> filter(Predicate<? super T> filter) {
-        return wrap(pipeline.append(FilterAction.create(pipeline, (Predicate<T>) filter)), parallel);
+        return internalWrap(pipeline.append(FilterAction.create(pipeline, (Predicate<T>) filter)), parallel);
     }
 
     /**
@@ -86,7 +86,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        return wrap(pipeline.append(MapAction.create(pipeline, (Function<T, R>) mapper)), parallel);
+        return internalWrap(pipeline.append(MapAction.create(pipeline, (Function<T, R>) mapper)), parallel);
     }
 
     /**
@@ -95,7 +95,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public IntStream mapToInt(ToIntFunction<? super T> mapper) {
-        return MutableIntStream.wrap(pipeline.append(MapToIntAction.create(pipeline, (ToIntFunction<T>) mapper)), parallel);
+        return MutableIntStream.internalWrap(pipeline.append(MapToIntAction.create(pipeline, (ToIntFunction<T>) mapper)), parallel);
     }
 
     /**
@@ -104,7 +104,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public LongStream mapToLong(ToLongFunction<? super T> mapper) {
-        return MutableLongStream.wrap(pipeline.append(MapToLongAction.create(pipeline, (ToLongFunction<T>) mapper)), parallel);
+        return MutableLongStream.internalWrap(pipeline.append(MapToLongAction.create(pipeline, (ToLongFunction<T>) mapper)), parallel);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper) {
-        return MutableDoubleStream.wrap(pipeline.append(MapToDoubleAction.create(pipeline, (ToDoubleFunction<T>) mapper)), parallel);
+        return MutableDoubleStream.internalWrap(pipeline.append(MapToDoubleAction.create(pipeline, (ToDoubleFunction<T>) mapper)), parallel);
     }
 
     /**
@@ -122,7 +122,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
-        return wrap(pipeline.append(FlatMapAction.create(pipeline, (Function<T, Stream<R>>) mapper)), parallel);
+        return internalWrap(pipeline.append(FlatMapAction.create(pipeline, (Function<T, Stream<R>>) mapper)), parallel);
     }
 
     /**
@@ -131,7 +131,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper) {
-        return MutableIntStream.wrap(pipeline.append(FlatMapToIntAction.create(pipeline, (Function<T, IntStream>) mapper)), parallel);
+        return MutableIntStream.internalWrap(pipeline.append(FlatMapToIntAction.create(pipeline, (Function<T, IntStream>) mapper)), parallel);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public LongStream flatMapToLong(Function<? super T, ? extends LongStream> mapper) {
-        return MutableLongStream.wrap(pipeline.append(FlatMapToLongAction.create(pipeline, (Function<T, LongStream>) mapper)), parallel);
+        return MutableLongStream.internalWrap(pipeline.append(FlatMapToLongAction.create(pipeline, (Function<T, LongStream>) mapper)), parallel);
     }
 
     /**
@@ -149,7 +149,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> mapper) {
-        return MutableDoubleStream.wrap(pipeline.append(FlatMapToDoubleAction.create(pipeline, (Function<T, DoubleStream>) mapper)), parallel);
+        return MutableDoubleStream.internalWrap(pipeline.append(FlatMapToDoubleAction.create(pipeline, (Function<T, DoubleStream>) mapper)), parallel);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> distinct() {
-        return wrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(DistinctAction.create(pipeline)), parallel);
     }
 
     /**
@@ -165,7 +165,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> sorted() {
-        return wrap(pipeline.append(SortedAction.create(pipeline)), parallel);
+        return internalWrap(pipeline.append(SortedAction.create(pipeline)), parallel);
     }
 
     /**
@@ -174,7 +174,7 @@ public final class MutableStream<T> implements Stream<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Stream<T> sorted(Comparator<? super T> comparator) {
-        return wrap(pipeline.append(SortedAction.create(pipeline, (Comparator<T>) comparator)), parallel);
+        return internalWrap(pipeline.append(SortedAction.create(pipeline, (Comparator<T>) comparator)), parallel);
     }
 
     /**
@@ -192,7 +192,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> limit(long limit) {
-        return wrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
+        return internalWrap(pipeline.append(LimitAction.create(pipeline, limit)), parallel);
     }
 
     /**
@@ -200,7 +200,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> skip(long skip) {
-        return wrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
+        return internalWrap(pipeline.append(SkipAction.create(pipeline, skip)), parallel);
     }
     
     /**************************************************************************/
@@ -385,7 +385,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> sequential() {
-        return parallel ? wrap(pipeline, false) : this;
+        return parallel ? internalWrap(pipeline, false) : this;
     }
 
     /**
@@ -393,7 +393,7 @@ public final class MutableStream<T> implements Stream<T> {
      */
     @Override
     public Stream<T> parallel() {
-        return parallel ? this : wrap(pipeline, true);
+        return parallel ? this : internalWrap(pipeline, true);
     }
 
     /**
