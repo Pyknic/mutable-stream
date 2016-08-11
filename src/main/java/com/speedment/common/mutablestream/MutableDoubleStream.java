@@ -64,7 +64,7 @@ public final class MutableDoubleStream implements DoubleStream {
     }
     
     /**************************************************************************/
-    /*                          Doubleermediate Actions                          */
+    /*                          Intermediate Actions                          */
     /**************************************************************************/
 
     /**

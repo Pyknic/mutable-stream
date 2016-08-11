@@ -65,7 +65,7 @@ public final class MutableLongStream implements LongStream {
     }
     
     /**************************************************************************/
-    /*                          Longermediate Actions                          */
+    /*                          Intermediate Actions                          */
     /**************************************************************************/
 
     /**
