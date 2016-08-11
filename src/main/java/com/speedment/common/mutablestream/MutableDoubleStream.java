@@ -97,7 +97,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public LongStream mapToLong(DoubleToLongFunction mapper) {
-        return MutableLongStream.wrap(pipeline.append(MapDoubleToLongAction.create(pipeline, (DoubleToLongFunction) mapper)), parallel);
+        return MutableLongStream.wrap(pipeline.append(MapDoubleToLongAction.create(pipeline, mapper)), parallel);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class MutableDoubleStream implements DoubleStream {
      */
     @Override
     public IntStream mapToInt(DoubleToIntFunction mapper) {
-        return MutableIntStream.wrap(pipeline.append(MapDoubleToIntAction.create(pipeline, (DoubleToIntFunction) mapper)), parallel);
+        return MutableIntStream.wrap(pipeline.append(MapDoubleToIntAction.create(pipeline, mapper)), parallel);
     }
 
     /**

@@ -1,13 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.pyknic</groupId>
-    <artifactId>MutableStream</artifactId>
+    
+    <parent>
+        <groupId>com.speedment.common</groupId>
+        <artifactId>common</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>mutable-stream</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    
+    <name>Speedment - Common - MutableStream</name>
+    <description>
+        An implementation of the Java 8 Stream API that allows the pipeline to 
+        be mutated before it is executed.
+    </description>
+    <url>https://www.github.com/speedment/speedment/wiki/MutableStream/</url>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Vendor>Speedment, Inc.</Bundle-Vendor>
+                        <Bundle-Description>
+                            An implementation of the Java 8 Stream API that 
+                            allows the pipeline to be mutated before it is 
+                            executed.
+                        </Bundle-Description>
+                        <Import-Package>
+                            org.osgi.framework,
+                            *;resolution:=optional 
+                        </Import-Package>
+                        <Export-Package>
+                            com.speedment.common.mutablestream,
+                            com.speedment.common.mutablestream.action,
+                            com.speedment.common.mutablestream.source,
+                            com.speedment.common.mutablestream.terminate,
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>                            
+        </plugins>
+    </build>
 </project>
