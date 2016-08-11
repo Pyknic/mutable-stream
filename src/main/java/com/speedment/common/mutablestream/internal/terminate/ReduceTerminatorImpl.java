@@ -2,7 +2,6 @@ package com.speedment.common.mutablestream.internal.terminate;
 
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.ReduceTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -56,7 +55,7 @@ implements ReduceTerminator<T, U> {
     @Override
     @SuppressWarnings("unchecked")
     public U execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             if (accumulator == null) { // T and U are the same.
                 final BinaryOperator<T> tCombiner = (BinaryOperator<T>) combiner;
                 

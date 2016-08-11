@@ -29,7 +29,7 @@ implements ForEachIntTerminator {
 
     @Override
     public Void execute() {
-        try (final IntStream stream = previous().build(isParallel())) {
+        try (final IntStream stream = buildPrevious()) {
             stream.forEach(consumer);
         }
         

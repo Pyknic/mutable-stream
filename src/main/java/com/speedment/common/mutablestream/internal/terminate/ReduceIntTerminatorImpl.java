@@ -48,7 +48,7 @@ implements ReduceIntTerminator {
     
     @Override
     public OptionalInt execute() {
-        try (final IntStream stream = previous().build(isParallel())) {
+        try (final IntStream stream = buildPrevious()) {
             if (hasInitialValue) {
                 return OptionalInt.of(stream.reduce(initialValue, combiner));
             } else {

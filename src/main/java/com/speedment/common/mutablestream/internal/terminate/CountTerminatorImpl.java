@@ -27,7 +27,7 @@ implements CountTerminator<T, TS> {
     @Override
     @SuppressWarnings("unchecked")
     public Long execute() {
-        try (final TS built = previous().build(isParallel())) {
+        try (final TS built = buildPrevious()) {
             if (built instanceof Stream<?>) {
                 return ((Stream<T>) built).count();
             } else if (built instanceof IntStream) {

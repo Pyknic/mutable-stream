@@ -22,7 +22,7 @@ implements IteratorTerminator<T> {
 
     @Override
     public Iterator<T> execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.iterator();
         }
     }

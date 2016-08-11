@@ -22,7 +22,7 @@ implements SpliteratorTerminator<T> {
 
     @Override
     public Spliterator<T> execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.spliterator();
         }
     }

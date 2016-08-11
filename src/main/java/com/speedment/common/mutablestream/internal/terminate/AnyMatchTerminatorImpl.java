@@ -2,7 +2,6 @@ package com.speedment.common.mutablestream.internal.terminate;
 
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.AnyMatchTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
@@ -32,7 +31,7 @@ implements AnyMatchTerminator<T> {
     
     @Override
     public Boolean execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.anyMatch(predicate);
         }
     }

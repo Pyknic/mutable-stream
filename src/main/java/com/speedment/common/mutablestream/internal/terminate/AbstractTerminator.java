@@ -32,4 +32,8 @@ abstract class AbstractTerminator<T, TS extends BaseStream<T, TS>, R> implements
     public final HasNext<T, TS> previous() {
         return previous;
     }
+    
+    protected final TS buildPrevious() {
+        return previous.build(parallel);
+    }
 }

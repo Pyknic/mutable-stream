@@ -3,7 +3,6 @@ package com.speedment.common.mutablestream.internal.terminate;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.MinTerminator;
 import java.util.Comparator;
-import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
@@ -33,7 +32,7 @@ implements MinTerminator<T> {
     
     @Override
     public Optional<T> execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.min(comparator);
         }
     }

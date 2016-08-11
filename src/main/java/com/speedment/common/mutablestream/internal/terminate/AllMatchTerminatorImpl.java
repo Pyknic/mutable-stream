@@ -31,7 +31,7 @@ implements AllMatchTerminator<T> {
     
     @Override
     public Boolean execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.allMatch(predicate);
         }
     }

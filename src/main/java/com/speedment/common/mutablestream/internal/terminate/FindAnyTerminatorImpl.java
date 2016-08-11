@@ -22,7 +22,7 @@ implements FindAnyTerminator<T> {
 
     @Override
     public Optional<T> execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.findAny();
         }
     }

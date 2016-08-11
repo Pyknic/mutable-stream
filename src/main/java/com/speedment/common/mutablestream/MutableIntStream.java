@@ -8,6 +8,7 @@ import com.speedment.common.mutablestream.action.MapIntAction;
 import com.speedment.common.mutablestream.action.MapIntToIntAction;
 import com.speedment.common.mutablestream.action.SkipAction;
 import com.speedment.common.mutablestream.action.SortedAction;
+import com.speedment.common.mutablestream.terminate.CollectIntTerminator;
 import com.speedment.common.mutablestream.terminate.CountTerminator;
 import com.speedment.common.mutablestream.terminate.ForEachIntOrderedTerminator;
 import com.speedment.common.mutablestream.terminate.ForEachIntTerminator;
@@ -193,8 +194,8 @@ public final class MutableIntStream implements IntStream {
      * {@inheritDoc}
      */
     @Override
-    public <R> R collect(Supplier<R> splr, ObjIntConsumer<R> oic, BiConsumer<R, R> bc) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public <R> R collect(Supplier<R> supplier, ObjIntConsumer<R> accumulator, BiConsumer<R, R> merger) {
+        return pipeline.execute(CollectIntTerminator.create(pipeline, parallel, supplier, accumulator, merger));
     }
 
     /**

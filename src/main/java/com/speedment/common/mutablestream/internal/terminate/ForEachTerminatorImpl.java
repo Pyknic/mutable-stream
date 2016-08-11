@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.ForEachTerminator;
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -32,7 +31,7 @@ implements ForEachTerminator<T> {
 
     @Override
     public Void execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             stream.forEach(consumer);
         }
         

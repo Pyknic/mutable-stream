@@ -19,7 +19,7 @@ implements ToIntArrayTerminator {
 
     @Override
     public int[] execute() {
-        try (final IntStream stream = previous().build(isParallel())) {
+        try (final IntStream stream = buildPrevious()) {
             return stream.toArray();
         }
     }

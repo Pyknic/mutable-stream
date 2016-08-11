@@ -2,7 +2,6 @@ package com.speedment.common.mutablestream.internal.terminate;
 
 import com.speedment.common.mutablestream.HasNext;
 import com.speedment.common.mutablestream.terminate.CollectTerminator;
-import static java.util.Objects.requireNonNull;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
@@ -34,7 +33,7 @@ implements CollectTerminator<T, A, R> {
 
     @Override
     public R execute() {
-        try (final Stream<T> stream = previous().build(isParallel())) {
+        try (final Stream<T> stream = buildPrevious()) {
             return stream.collect(collector);
         }
     }
